@@ -11,3 +11,6 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+// app.get('/api/auth',require('./routes/Auth'));
+app.get('/api/notes',require('./routes/notes'));
