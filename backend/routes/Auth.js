@@ -52,7 +52,45 @@ res.json({authToken})
 //Earlier we were using this .then method but now shifted to async await
 // .then(user=>{res.json(user)}).catch(err=>{console.log(err) 
 //   res.json({error:"please enter unique vlaue",msg:err.message})}  )
+})
 
-  })
+//for authentication/login
+
+router.post('/login',[
+  body('email','Enter a valid email').isEmail(),
+  body('password','Password cannot be blank').exists()
+  ] ,async(req, res) => {
+  const errors=validationResult(req);
+  if(!errors.isEmpty()){
+    return res.status(400).json({error:errors.array()})
+  }
+  const {email,password}=req.body
+  try {
+    let user=await User.findOne({email})
+  if(!user){
+    return res.status(400).json({error:"Please login with correct credentials"})
+  }
+
+  const passwordComp=await bcrypt.compare(password,user.password)
+  if(!passwordComp){
+    return res.status(400).json({error:"Please login with correct credentials"})
+}
+  
+  const data={
+    user:{
+      id:user.id
+    }
+  }
+  
+  const authToken=jwt.sign(data,JWT_SECRET)
+  
+  res.json({authToken})
+  
+  } catch (error) {
+    console.error(error.message)
+    res.status(500).send("Internal server error occured ")
+  }
+})
+
 
   module.exports = router
